@@ -1,0 +1,31 @@
+services:
+  app:
+    build: .
+    volumes: ['.:/var/www']
+    environment:
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - QUEUE_CONNECTION=rabbitmq
+      - REDIS_HOST=redis
+  
+  db:
+    image: mariadb:10.11
+    environment:
+      - MARIADB_DATABASE=laravel
+      - MARIADB_ROOT_PASSWORD=root
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports: ['15672:15672'] # Админка RabbitMQ
+
+  redis:
+    image: redis:alpine
+
+  echo-server:
+    image: oanhnn/laravel-echo-server
+    ports: ['6001:6001']
+
+  worker:
+    build: .
+    command: php artisan queue:work rabbitmq
+    volumes: ['.:/var/www']
